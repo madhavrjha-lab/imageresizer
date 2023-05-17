@@ -99,25 +99,24 @@
               .catch(data => console.log(data))
 
 
-              // The UI things to avoid
-              (function () {
-                const contentDiv = document.querySelector('.content');
+            // The UI things to avoid
 
-                [
-                  URL.createObjectURL(homePageImageBlob),
-                  URL.createObjectURL(seoImageBlob),
-                  URL.createObjectURL(faviconImageBlob)
-                ].forEach(url => {
-                  const img = document.createElement('img');
-                  img.setAttribute('src', url);
-                  img.setAttribute('style', 'display: inline-block; padding: 1rem; margin-right: 10px; border: 10px solid red;')
-                  contentDiv.append(img);
-                });
+            const contentDiv = document.querySelector('.content');
 
-                for (var pair of formData.entries()) {
-                  console.log(pair[0] + ', ' + pair[1]);
-                }
-              })();
+            [
+              URL.createObjectURL(homePageImageBlob),
+              URL.createObjectURL(seoImageBlob),
+              URL.createObjectURL(faviconImageBlob)
+            ].forEach(url => {
+              const img = document.createElement('img');
+              img.setAttribute('src', url);
+              img.setAttribute('style', 'display: inline-block; padding: 1rem; margin-right: 10px; border: 10px solid red;')
+              contentDiv.append(img);
+            });
+
+            for (var pair of formData.entries()) {
+              console.log(pair[0] + ', ' + pair[1]);
+            }
 
 
           }
