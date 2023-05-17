@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Resize Image by Height</title>
+</head>
+
+<body>
+
+  <input type="file" name="" id="icon-file-input">
+  <button onclick="GeneralSettings.handleFileUpload()">Upload</button>
+
+  <div class="content" style="margin-top: 1rem;">
+
+  </div>
+
+
+  <script>
+
+    class GeneralSettings {
+
+      static _b64toBlob(b64Data, contentType = '', sliceSize = 512) {
+        const byteCharacters = atob(b64Data);
+        const byteArrays = [];
+
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+          const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+          const byteNumbers = new Array(slice.length);
+          for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+
+          const byteArray = new Uint8Array(byteNumbers);
+          byteArrays.push(byteArray);
+        }
+
+        const blob = new Blob(byteArrays, { type: contentType });
+        return blob;
+      }
+
+      static getIconFile() {
+        const fileInput = document.getElementById('icon-file-input');
+        return fileInput.files[0];
+      }
+
+      static setImages(file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+
+          const img = new Image();
+          img.onload = () => {
+
+            function getDesiredImage(desiredHeight, contentType, backgroundFill = false) {
+              const canvas = document.createElement('canvas');
+              const context = canvas.getContext('2d');
+
+              const aspectRatio = img.width / img.height;
+              const width = Math.round(desiredHeight * aspectRatio);
+
+              canvas.width = width;
+              canvas.height = desiredHeight;
+
+              if (backgroundFill) {
+                context.fillStyle = 'white';
+                context.fillRect(0, 0, width, desiredHeight);
+              }
+
+              context.drawImage(img, 0, 0, width, desiredHeight);
+
+              const resizedDataUrl = canvas.toDataURL('image/jpg', 1);
+              const base64Data = resizedDataUrl.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+              const imageBlob = GeneralSettings._b64toBlob(base64Data, contentType);
+
+              return imageBlob;
+            }
+
+            const faviconImageBlob = getDesiredImage(50, 'image/webp');
+            const homePageImageBlob = getDesiredImage(400, 'image/webp');
+            const seoImageBlob = getDesiredImage(200, 'image/jpg', true);
+
+            const formData = new FormData();
+
+            formData.append('favicon', faviconImageBlob);
+            formData.append('home-page-icon', homePageImageBlob);
+            formData.append('seo-image', seoImageBlob);
+
+            // SUBMIT FORM CODE HERE
+
+            fetch(`<<<OUR_API_URL>>>`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: '<<<OUR_BEARER_TOKEN>>>'
+              },
+              body: formData
+            }).then(data => console.log(data))
+              .catch(data => console.log(data))
+
+
+              // The UI things to avoid
+              (function () {
+                const contentDiv = document.querySelector('.content');
+
+                [
+                  URL.createObjectURL(homePageImageBlob),
+                  URL.createObjectURL(seoImageBlob),
+                  URL.createObjectURL(faviconImageBlob)
+                ].forEach(url => {
+                  const img = document.createElement('img');
+                  img.setAttribute('src', url);
+                  img.setAttribute('style', 'display: inline-block; padding: 1rem; margin-right: 10px; border: 10px solid red;')
+                  contentDiv.append(img);
+                });
+
+                for (var pair of formData.entries()) {
+                  console.log(pair[0] + ', ' + pair[1]);
+                }
+              })();
+
+
+          }
+          img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+
+      static handleFileUpload() {
+        const iconFile = GeneralSettings.getIconFile();
+        GeneralSettings.setImages(iconFile);
+      }
+    }
+  </script>
+</body>
+
+</html>
